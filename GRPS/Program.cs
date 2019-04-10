@@ -2,13 +2,31 @@
 
 namespace GRPS
 {
-    class FileLogger
+
+    public interface IWriter
     {
-        public void Handle(string error)
-        {
-            System.IO.File.WriteAllText(@"c:\Error.txt", error);
-        }
+        void WriteFile(string Message);
     }
+       public class FileLogging: IWriter
+          {
+
+            private readonly IWriter _IWriter;
+
+        public FileLogging()
+        {
+        }
+
+        public FileLogging(IWriter IWriter)
+            {
+                this._IWriter = IWriter;
+
+            }
+            public void WriteFile(string Message)
+            {
+                System.IO.File.WriteAllText(@"c:\Error.txt", Message);
+            }
+        }
+
     enum Selection
     {
         Rock=0,
@@ -25,8 +43,8 @@ namespace GRPS
 
     class Computer : Contestant
     {
-        
-        FileLogger objlogger = new FileLogger();
+
+        IWriter Logger = new FileLogging();
         public override Selection Select()
         {
             try
@@ -36,7 +54,11 @@ namespace GRPS
             }
             catch (Exception ex)
             {
-                objlogger.Handle(ex.ToString());
+                Logger.WriteFile(ex.ToString());
+            }
+            finally
+            {
+                Logger.WriteFile("Computer Class");
             }
             return selection;
 
@@ -44,7 +66,7 @@ namespace GRPS
     }
     class Player : Contestant
     {
-        FileLogger objlogger = new FileLogger();
+        IWriter Logger = new FileLogging();
         public override Selection Select()
         {
             bool isValid;
@@ -69,7 +91,11 @@ namespace GRPS
             }
             catch (Exception ex)
             {
-                objlogger.Handle(ex.ToString());
+                Logger.WriteFile(ex.ToString());
+            }
+            finally
+                {
+                Logger.WriteFile("Player Class");
             }
             return selection;
         }
@@ -80,90 +106,128 @@ namespace GRPS
         public static int GamesPlayed;
         public static void Main()
         {
-            FileLogger objlogger = new FileLogger();
+            IWriter Logger = new FileLogging();
             try
                 {
-                    Console.BackgroundColor = ConsoleColor.White;
-                    Console.ForegroundColor = ConsoleColor.Black;
-                    Contestant computer = new Computer();
-                    Contestant player = new Player();
-                    Selection computerSelection;
-                    Selection playerSelection;
-                    ConsoleKeyInfo input;
-                    bool repeat;
-
-                    do
-                    {
-                        Console.Clear();
-                        computerSelection = computer.Select();
-                        playerSelection = player.Select();
-                        Console.Clear();
-
-                        Console.WriteLine("Player Selected: " + playerSelection);
-                        Console.WriteLine("\n" + "Computer Selected: " + computerSelection);
-
-                        switch (determineWinner((int)computerSelection, (int)playerSelection))
-                        {
-                            case null:
-                                Console.Write("\nMatch Tie");
-                                break;
-
-                            case true:
-                                Console.Write("\nPlayer won!");
-                                player.wins++;
-                                break;
-
-                            default:
-                                Console.Write("\nPlayer lost");
-                                computer.wins++;
-                                break;
-                        }
-
-                        RPS.GamesPlayed++;
-                        Console.WriteLine("\n" + "Play again? <y/n>");
-                        Console.WriteLine("\n");
-
-                        int resetPosY = Console.CursorTop;
-                        int resetPosX = Console.CursorLeft;
-
-                        if (RPS.GamesPlayed == 3)
-                        {
-                            if (player.wins == computer.wins)
-                            {
-                                Console.WriteLine("-------Final Result------ ");
-                                Console.WriteLine("Match Drawn");
-                                Console.ReadKey();
-                            }
-
-                            else if (player.wins < computer.wins)
-                            {
-                                Console.WriteLine("-------Final Result------ ");
-                                Console.WriteLine("Computer Wins");
-                                Console.ReadKey();
-                            }
-                            else if (player.wins > computer.wins)
-                            {
-                                Console.WriteLine("-------Final Result------ ");
-                                Console.WriteLine("Player Wins"); 
-                                Console.ReadKey();
-                            }
-                            break;
-                        }
-                        Console.SetCursorPosition(resetPosX, resetPosY);
-                        input = Console.ReadKey(true);
-                        repeat = input.KeyChar == 'y';
-
-                    } while (repeat);
+                  gamesplayed();
                 }
                 catch (Exception ex)
                 {
-                objlogger.Handle(ex.ToString());
+                Logger.WriteFile(ex.ToString());
                 }
-                
+            finally
+            {
+                Logger.WriteFile("Main Class");
+            }
+
         }
+
+        private static void gamesplayed()
+        {
+            IWriter Logger = new FileLogging();
+            try { 
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Contestant computer = new Computer();
+            Contestant player = new Player();
+            Selection computerSelection;
+            Selection playerSelection;
+            ConsoleKeyInfo input;
+            bool repeat;
+
+            do
+            {
+                Console.Clear();
+                computerSelection = computer.Select();
+                playerSelection = player.Select();
+                Console.Clear();
+
+                Console.WriteLine("Player Selected: " + playerSelection);
+                Console.WriteLine("\n" + "Computer Selected: " + computerSelection);
+
+                switch (determineWinner((int)computerSelection, (int)playerSelection))
+                {
+                    case null:
+                        Console.Write("\nMatch Tie");
+                        break;
+
+                    case true:
+                        Console.Write("\nPlayer won!");
+                        player.wins++;
+                        break;
+
+                    default:
+                        Console.Write("\nPlayer lost");
+                        computer.wins++;
+                        break;
+                }
+
+                RPS.GamesPlayed++;
+                Console.WriteLine("\n" + "Play again? <y/n>");
+                Console.WriteLine("\n");
+
+                int resetPosY = Console.CursorTop;
+                int resetPosX = Console.CursorLeft;
+                determineChampion(RPS.GamesPlayed, player.wins, computer.wins);
+                Console.SetCursorPosition(resetPosX, resetPosY);
+                input = Console.ReadKey(true);
+                repeat = input.KeyChar == 'y';
+
+            } while (repeat);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteFile(ex.ToString());
+            }
+            finally
+            {
+                Logger.WriteFile("gamesplayed method");
+            }
+        }
+
+        private static void determineChampion(int GamesPlayed, int playerwins, int computerwins)
+        {
+            IWriter Logger = new FileLogging();
+            try
+            {
+                if (GamesPlayed == 3)
+                {
+                    if (playerwins == computerwins)
+                    {
+                        Console.WriteLine("-------Final Result------ ");
+                        Console.WriteLine("Match Drawn");
+                        Console.ReadKey();
+                    }
+
+                    else if (playerwins < computerwins)
+                    {
+                        Console.WriteLine("-------Final Result------ ");
+                        Console.WriteLine("Computer Wins");
+                        Console.ReadKey();
+                    }
+                    else if (playerwins > computerwins)
+                    {
+                        Console.WriteLine("-------Final Result------ ");
+                        Console.WriteLine("Player Wins");
+                        Console.ReadKey();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteFile(ex.ToString());
+            }
+            finally
+            {
+                Logger.WriteFile("determineChampion method");
+            }
+            return;
+        }
+
         public static bool? determineWinner(int computerSelection, int playerSelection)
         {
-            FileLogger objlogger = new FileLogger();
+            IWriter Logger = new FileLogging();
             try
             {
                 bool?[,] winMatrix = {
@@ -172,14 +236,19 @@ namespace GRPS
             {false, true, null}
         };
 
+
                 if (winMatrix[playerSelection, computerSelection] == null)
                     return null;
                 return (winMatrix[playerSelection, computerSelection] == true) ? true : false;
             }
             catch (Exception ex)
             {
-                objlogger.Handle(ex.ToString());
+                Logger.WriteFile(ex.ToString());
                 return null; 
+            }
+            finally
+            {
+                Logger.WriteFile("determineWinner method");
             }
         }
     }
