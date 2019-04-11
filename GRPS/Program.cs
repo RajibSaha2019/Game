@@ -7,25 +7,27 @@ namespace GRPS
     {
         void WriteFile(string Message);
     }
-       public class FileLogging: IWriter
-          {
-
-            private readonly IWriter _IWriter;
-
-        public FileLogging()
+   class EventLogWriter : IWriter
+    {
+        public void WriteFile(string Message)
         {
+            System.IO.File.WriteAllText(@"c:\Error.txt", Message);
         }
 
-        public FileLogging(IWriter IWriter)
-            {
-                this._IWriter = IWriter;
+    }
 
-            }
-            public void WriteFile(string Message)
-            {
-                System.IO.File.WriteAllText(@"c:\Error.txt", Message);
-            }
+    class LogInFile 
+    {
+        IWriter _IWriter;
+        public LogInFile(IWriter IWriter)
+        {
+            this._IWriter = IWriter;
         }
+        public void WriteFile(string Message)
+        {
+            _IWriter.WriteFile(Message);
+        }       
+    }
 
     enum Selection
     {
@@ -43,8 +45,11 @@ namespace GRPS
 
     class Computer : Contestant
     {
+        LogInFile LogInFile = new LogInFile(new EventLogWriter());
 
-        IWriter Logger = new FileLogging();
+
+        //IWriter Logger = new FileLogging();
+
         public override Selection Select()
         {
             try
@@ -54,11 +59,11 @@ namespace GRPS
             }
             catch (Exception ex)
             {
-                Logger.WriteFile(ex.ToString());
+                LogInFile.WriteFile(ex.ToString());
             }
             finally
             {
-                Logger.WriteFile("Computer Class");
+                LogInFile.WriteFile("Computer Class");
             }
             return selection;
 
@@ -66,7 +71,10 @@ namespace GRPS
     }
     class Player : Contestant
     {
-        IWriter Logger = new FileLogging();
+        LogInFile LogInFilePlayer = new LogInFile(new EventLogWriter());
+        //IWriter Logger = new FileLogging();
+
+
         public override Selection Select()
         {
             bool isValid;
@@ -91,11 +99,11 @@ namespace GRPS
             }
             catch (Exception ex)
             {
-                Logger.WriteFile(ex.ToString());
+                LogInFilePlayer.WriteFile(ex.ToString());
             }
             finally
                 {
-                Logger.WriteFile("Player Class");
+                LogInFilePlayer.WriteFile("Player Class");
             }
             return selection;
         }
@@ -103,28 +111,30 @@ namespace GRPS
 
     public class RPS
     {
+      
+
+        LogInFile LogInFileo = new LogInFile(new EventLogWriter());
+
         public static int GamesPlayed;
+
         public static void Main()
         {
-            IWriter Logger = new FileLogging();
             try
                 {
                   gamesplayed();
                 }
                 catch (Exception ex)
                 {
-                Logger.WriteFile(ex.ToString());
                 }
             finally
             {
-                Logger.WriteFile("Main Class");
             }
 
         }
 
-        private static void gamesplayed()
+        public static void gamesplayed()
         {
-            IWriter Logger = new FileLogging();
+            LogInFile LogInFileo = new LogInFile(new EventLogWriter());
             try { 
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Black;
@@ -133,67 +143,82 @@ namespace GRPS
             Selection computerSelection;
             Selection playerSelection;
             ConsoleKeyInfo input;
-            bool repeat;
+            bool repeat=true;
 
             do
             {
-                Console.Clear();
+               
                 computerSelection = computer.Select();
                 playerSelection = player.Select();
-                Console.Clear();
+               
 
-                Console.WriteLine("Player Selected: " + playerSelection);
+                Console.WriteLine("\n" + "Player Selected: " + playerSelection);
                 Console.WriteLine("\n" + "Computer Selected: " + computerSelection);
+                    
 
-                switch (determineWinner((int)computerSelection, (int)playerSelection))
+                    switch (determineWinner((int)computerSelection, (int)playerSelection))
                 {
                     case null:
                         Console.Write("\nMatch Tie");
-                        break;
+                            Console.Write("\n");
+                            Console.ReadKey();
+                            break;
 
                     case true:
                         Console.Write("\nPlayer won!");
-                        player.wins++;
+                            Console.Write("\n");
+                            player.wins++;
+                            Console.ReadKey();
                         break;
 
                     default:
                         Console.Write("\nPlayer lost");
-                        computer.wins++;
+                            Console.Write("\n");
+                            computer.wins++;
+                            Console.ReadKey();
                         break;
                 }
 
                 RPS.GamesPlayed++;
-                Console.WriteLine("\n" + "Play again? <y/n>");
-                Console.WriteLine("\n");
-
-                int resetPosY = Console.CursorTop;
-                int resetPosX = Console.CursorLeft;
-                determineChampion(RPS.GamesPlayed, player.wins, computer.wins);
-                Console.SetCursorPosition(resetPosX, resetPosY);
-                input = Console.ReadKey(true);
-                repeat = input.KeyChar == 'y';
-
+                    if (RPS.GamesPlayed==3)
+                    { 
+                determineChampion(player.wins, computer.wins);
+                   
+                   Console.WriteLine("\n" + "Play again? <y/n>");
+                  Console.WriteLine("\n");
+                        input = Console.ReadKey(true);
+                        
+                        repeat = input.KeyChar == 'y';
+                        if (repeat == true)
+                        {
+                            GamesPlayed = 0;
+                        }
+                        Console.Clear();
+                    }
+                    int resetPosY = Console.CursorTop;
+                    int resetPosX = Console.CursorLeft;
+                    Console.SetCursorPosition(resetPosX, resetPosY);
+               
             } while (repeat);
             }
             catch (Exception ex)
             {
-                Logger.WriteFile(ex.ToString());
+                LogInFileo.WriteFile(ex.ToString());
             }
             finally
             {
-                Logger.WriteFile("gamesplayed method");
+                LogInFileo.WriteFile("gamesplayed method");
             }
         }
 
-        private static void determineChampion(int GamesPlayed, int playerwins, int computerwins)
+        public static void determineChampion(int playerwins, int computerwins)
         {
-            IWriter Logger = new FileLogging();
+            LogInFile LogInFileo = new LogInFile(new EventLogWriter());
             try
             {
-                if (GamesPlayed == 3)
-                {
                     if (playerwins == computerwins)
                     {
+                    Console.WriteLine("\n");
                         Console.WriteLine("-------Final Result------ ");
                         Console.WriteLine("Match Drawn");
                         Console.ReadKey();
@@ -201,33 +226,35 @@ namespace GRPS
 
                     else if (playerwins < computerwins)
                     {
-                        Console.WriteLine("-------Final Result------ ");
+                    Console.WriteLine("\n");
+                    Console.WriteLine("-------Final Result------ ");
                         Console.WriteLine("Computer Wins");
                         Console.ReadKey();
                     }
                     else if (playerwins > computerwins)
                     {
-                        Console.WriteLine("-------Final Result------ ");
+                    Console.WriteLine("\n");
+                    Console.WriteLine("-------Final Result------ ");
                         Console.WriteLine("Player Wins");
                         Console.ReadKey();
                     }
-                }
 
             }
             catch (Exception ex)
             {
-                Logger.WriteFile(ex.ToString());
+                LogInFileo.WriteFile(ex.ToString());
             }
             finally
             {
-                Logger.WriteFile("determineChampion method");
+                LogInFileo.WriteFile("determineChampion method");
+                
             }
             return;
         }
 
         public static bool? determineWinner(int computerSelection, int playerSelection)
         {
-            IWriter Logger = new FileLogging();
+            LogInFile LogInFileo = new LogInFile(new EventLogWriter());
             try
             {
                 bool?[,] winMatrix = {
@@ -243,12 +270,12 @@ namespace GRPS
             }
             catch (Exception ex)
             {
-                Logger.WriteFile(ex.ToString());
+                LogInFileo.WriteFile(ex.ToString());
                 return null; 
             }
             finally
             {
-                Logger.WriteFile("determineWinner method");
+                LogInFileo.WriteFile("determineWinner method");
             }
         }
     }

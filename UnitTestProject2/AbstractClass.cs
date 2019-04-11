@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System;
 
-namespace UnitTestProject2
+namespace GRPS
 {
     enum Selection
     {

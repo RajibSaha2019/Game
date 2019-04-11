@@ -3,7 +3,7 @@ using GRPS;
 using System;
 
 //test Methods
-namespace UnitTestProject2
+namespace GRPS
 {
     [TestClass]
     public class UnitTest1
@@ -33,7 +33,7 @@ namespace UnitTestProject2
         public void CheckWinnerpositive0()//with values 0,1
         {
             //checking for return result as true
-            bool? result= RPS.determineWinner(0, 1);
+            bool? result = RPS.determineWinner(0, 1);
             bool expected = (bool)result;
             Assert.IsTrue(expected);
         }
@@ -84,8 +84,8 @@ namespace UnitTestProject2
         public void CheckAbstractMethodComputer()
         {
 
-           Computer computer = new Computer();
-           var returnvalue= computer.Select();
+            Computer computer = new Computer();
+            var returnvalue = computer.Select();
             Assert.IsNotNull(returnvalue);
         }
 
@@ -109,5 +109,5 @@ namespace UnitTestProject2
 
     }
 
-    }
+}
 
