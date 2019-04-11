@@ -112,24 +112,13 @@ namespace GRPS
     public class RPS
     {
       
-
-        LogInFile LogInFileo = new LogInFile(new EventLogWriter());
-
         public static int GamesPlayed;
 
         public static void Main()
         {
-            try
-                {
-                  gamesplayed();
-                }
-                catch (Exception ex)
-                {
-                }
-            finally
-            {
-            }
-
+            
+             gamesplayed();
+                
         }
 
         public static void gamesplayed()
